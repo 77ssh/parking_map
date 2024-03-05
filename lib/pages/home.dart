@@ -8,6 +8,7 @@ class HomePage extends StatefulWidget {
     super.key,
     required this.title,
   });
+
   final String title;
 
   @override
@@ -40,24 +41,30 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       body: NaverMap(
         options: const NaverMapViewOptions(
-          minZoom: 10, // 기본값은 0
-          maxZoom: 18, // 기본값은 21
-          maxTilt: 30, // 기본값은 63
+          minZoom: 10,
+          maxZoom: 18,
+          maxTilt: 30,
           initialCameraPosition: NCameraPosition(
-            target: NLatLng(37.5665, 126.9780), // 초기 중심 위치 (서울)
-            zoom: 20.0, // 초기 줌 레벨
+            target: NLatLng(37.5665, 126.9780),
+            zoom: 20.0,
           ),
         ),
         onMapReady: (controller) {
-          for (var parking in parkingData) {
-            final marker = NMarker(
-              id: parking['prkplce_nm'], // 마커 ID
-              position: NLatLng(parking['prkplce_la'], parking['prkplce_lo']),
-            );
-            controller.addOverlay(marker);
-          }
+          _addMarkers(controller);
         },
       ),
     );
+  }
+
+  void _addMarkers(NaverMapController controller) {
+    if (parkingData.isNotEmpty) {
+      for (var parking in parkingData) {
+        final marker = NMarker(
+          id: parking['prkplce_nm'], // 마커 ID
+          position: NLatLng(parking['prkplce_la'], parking['prkplce_lo']),
+        );
+        controller.addOverlay(marker);
+      }
+    }
   }
 }
