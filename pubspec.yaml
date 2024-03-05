@@ -11,17 +11,18 @@ dependencies:
     sdk: flutter
   cupertino_icons: ^1.0.6
   flutter_naver_map: ^1.2.1
+    
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^3.0.0
-  # csv 파일때문에 추가 
-  csv: ^6.0.0
+
 
 
 
 flutter:
-
+  assets:
+    - assets/parking_info.json
   uses-material-design: true
 
