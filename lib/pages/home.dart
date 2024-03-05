@@ -1,10 +1,13 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
-import 'dart:convert';
-import 'dart:io';
+import 'package:flutter/services.dart' show rootBundle;
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key, required this.title});
+  const HomePage({
+    super.key,
+    required this.title,
+  });
   final String title;
 
   @override
@@ -22,13 +25,13 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _loadParkingData() async {
     try {
-      File file = File('assets/parking_info.json'); // JSON 파일 경로
-      String jsonString = await file.readAsString();
+      String jsonString =
+          await rootBundle.loadString('assets/parking_info.json');
       setState(() {
         parkingData = json.decode(jsonString).cast<Map<String, dynamic>>();
       });
     } catch (e) {
-      debugPrint('Failed to load parking data: $e');
+      debugPrint('주차 데이터 로드 실패: $e');
     }
   }
 
@@ -37,13 +40,12 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       body: NaverMap(
         options: const NaverMapViewOptions(
-          minZoom: 10, // default is 0
-          maxZoom: 16, // default is 21
-          maxTilt: 30, // default is 63
+          minZoom: 10, // 기본값은 0
+          maxZoom: 16, // 기본값은 21
+          maxTilt: 30, // 기본값은 63
           initialCameraPosition: NCameraPosition(
-            target:
-                NLatLng(37.5665, 126.9780), // Initial center position (Seoul)
-            zoom: 12.0, // Initial zoom level
+            target: NLatLng(37.5665, 126.9780), // 초기 중심 위치 (서울)
+            zoom: 20.0, // 초기 줌 레벨
           ),
         ),
         onMapReady: (controller) {
@@ -55,13 +57,12 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _buildMarkers(NaverMapController controller) {
-    Set<NMarker> markers = parkingData.map((parking) {
-      return NMarker(
-        id: (parking['prkplce_nm']),
+    for (var parking in parkingData) {
+      NMarker marker = NMarker(
+        id: parking['prkplce_nm'], // 마커 ID
         position: NLatLng(parking['prkplce_la'], parking['prkplce_lo']),
       );
-    }).toSet();
-
-  controller. = markers;
+      controller.addOverlay(marker);
+    }
   }
 }
