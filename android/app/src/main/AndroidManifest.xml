@@ -34,7 +34,8 @@
          https://developer.android.com/training/package-visibility?hl=en and
          https://developer.android.com/reference/android/content/Intent#ACTION_PROCESS_TEXT.
 
-         In particular, this is used by the Flutter engine in io.flutter.plugin.text.ProcessTextPlugin. -->
+         In particular, this is used by the Flutter engine in io.flutter.plugin.text.ProcessTextPlugin.
+         meta-data 부분에 name,value 추가한게 안드로이드 naver map api 사용을 위해서 추가함  -->
     <queries>
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
