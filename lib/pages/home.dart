@@ -41,7 +41,7 @@ class _HomePageState extends State<HomePage> {
       body: NaverMap(
         options: const NaverMapViewOptions(
           minZoom: 10, // 기본값은 0
-          maxZoom: 16, // 기본값은 21
+          maxZoom: 18, // 기본값은 21
           maxTilt: 30, // 기본값은 63
           initialCameraPosition: NCameraPosition(
             target: NLatLng(37.5665, 126.9780), // 초기 중심 위치 (서울)
@@ -49,20 +49,15 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
         onMapReady: (controller) {
-          _buildMarkers(controller);
-          // debugPrint("네이버 맵 로딩 완료");
+          for (var parking in parkingData) {
+            final marker = NMarker(
+              id: parking['prkplce_nm'], // 마커 ID
+              position: NLatLng(parking['prkplce_la'], parking['prkplce_lo']),
+            );
+            controller.addOverlay(marker);
+          }
         },
       ),
     );
-  }
-
-  void _buildMarkers(NaverMapController controller) {
-    for (var parking in parkingData) {
-      NMarker marker = NMarker(
-        id: parking['prkplce_nm'], // 마커 ID
-        position: NLatLng(parking['prkplce_la'], parking['prkplce_lo']),
-      );
-      controller.addOverlay(marker);
-    }
   }
 }
