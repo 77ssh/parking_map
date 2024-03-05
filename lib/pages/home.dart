@@ -50,10 +50,20 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
         onMapReady: (controller) {
+          debugPrint('지도가 준비되었습니다.');
+          _addTestMarker(controller);
           _addMarkers(controller);
         },
       ),
     );
+  }
+
+  void _addTestMarker(NaverMapController controller) {
+    final testMarker = NMarker(
+      id: 'test_marker',
+      position: const NLatLng(37.5665, 126.9780), // 서울의 위도와 경도
+    );
+    controller.addOverlay(testMarker);
   }
 
   void _addMarkers(NaverMapController controller) {
