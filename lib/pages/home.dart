@@ -18,6 +18,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   List<Map<String, dynamic>> parkingData = []; // json 파일 list로 불러오기 위한 코드
   NaverMapController? _mapController; // 지도 컨트롤러 변수 -> 이게 핵심(컨트롤러 활성화)
+  Map<String, dynamic> infoWindowsData = {}; // 정보창 데이터를 저장할 맵 변수
 
   @override
   void initState() {
@@ -75,12 +76,10 @@ class _HomePageState extends State<HomePage> {
         );
         controller.addOverlay(infoWindow);
 
-        // 마커에 터치 이벤트 리스너 등록
+        // 정보창에 터치 이벤트 리스너 등록
         infoWindow.setOnTapListener((NInfoWindow infoWindow) {
-          final infoWindowData = infoWindowsData[infoWindow.id];
-          if (infoWindowData != null) {
-            _showParkingDetails(infoWindowData);
-          }
+          _showParkingDetails(
+              parking); // 터치 이벤트 리스너 등록의 핵심코드(json 불러오는 parking으로 해결)
         });
       }
     }
