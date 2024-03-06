@@ -16,8 +16,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  List<Map<String, dynamic>> parkingData = [];
-  NaverMapController? _mapController; // 지도 컨트롤러 변수
+  List<Map<String, dynamic>> parkingData = []; // json 파일 list로 불러오기 위한 코드
+  NaverMapController? _mapController; // 지도 컨트롤러 변수 -> 이게 핵심(컨트롤러 활성화)
 
   @override
   void initState() {
@@ -25,6 +25,7 @@ class _HomePageState extends State<HomePage> {
     _loadParkingData();
   }
 
+  // json 파일 불러오기
   Future<void> _loadParkingData() async {
     try {
       String jsonString =
@@ -44,40 +45,35 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       body: NaverMap(
         options: const NaverMapViewOptions(
-          minZoom: 10,
-          maxZoom: 18,
-          maxTilt: 30,
+          minZoom: 10, // default is 0
+          maxZoom: 16, // default is 21
+          maxTilt: 30, // default is 63
           initialCameraPosition: NCameraPosition(
-            target: NLatLng(37.5665, 126.9780),
-            zoom: 20.0,
+            target:
+                NLatLng(37.36771850000052, 127.1042703539339), // 초기 위치 설정(정자역)
+            zoom: 14.0,
           ),
         ),
         onMapReady: (controller) {
           debugPrint('지도가 준비되었습니다.');
-          // _addTestMarker(controller);
           _mapController = controller; // 지도 컨트롤러 설정
         },
       ),
     );
   }
 
-  // void _addTestMarker(NaverMapController controller) {
-  //   final testMarker = NMarker(
-  //     id: 'test_marker',
-  //     position: const NLatLng(37.5665, 126.9780), // 서울의 위도와 경도
-  //   );
-  //   controller.addOverlay(testMarker);
-  // }
-
   void _addMarkers() {
     final controller = _mapController;
     if (controller != null && parkingData.isNotEmpty) {
       for (var parking in parkingData) {
-        final marker = NMarker(
-          id: parking['prkplce_nm'], // 마커 ID
-          position: NLatLng(parking['prkplce_la'], parking['prkplce_lo']),
+        // 지도에 띄울 수 있는 정보창(마커 대신 사용)
+        final infoWindow = NInfoWindow.onMap(
+          id: parking['prkplce_mnnmb'],
+          text: "${parking['prkplce_nm']}", // 주차장명
+          position: NLatLng(parking['prkplce_la'],
+              parking['prkplce_lo']), // 주차장 표시하는 위치(경도,위도)
         );
-        controller.addOverlay(marker);
+        controller.addOverlay(infoWindow);
       }
     }
   }
