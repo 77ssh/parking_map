@@ -33,8 +33,8 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         parkingData = json.decode(jsonString).cast<Map<String, dynamic>>();
       });
-      // 데이터 로드가 완료되면 마커 추가
-      _addMarkers();
+      // 데이터 로드가 완료되면 정보창 추가
+      _addInfoWindows();
     } catch (e) {
       debugPrint('주차 데이터 로드 실패: $e');
     }
@@ -62,7 +62,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  void _addMarkers() {
+  void _addInfoWindows() {
     final controller = _mapController;
     if (controller != null && parkingData.isNotEmpty) {
       for (var parking in parkingData) {
@@ -74,7 +74,43 @@ class _HomePageState extends State<HomePage> {
               parking['prkplce_lo']), // 주차장 표시하는 위치(경도,위도)
         );
         controller.addOverlay(infoWindow);
+
+        // 마커에 터치 이벤트 리스너 등록
+        infoWindow.setOnTapListener((NInfoWindow infoWindow) {
+          final infoWindowData = infoWindowsData[infoWindow.id];
+          if (infoWindowData != null) {
+            _showParkingDetails(infoWindowData);
+          }
+        });
       }
     }
+  }
+
+  // 주차장 정보를 보여주는 다이얼로그 표시
+  void _showParkingDetails(Map<String, dynamic> parkingData) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('주차장 정보'),
+          content: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('주차장명: ${parkingData['prkplce_nm']}'),
+              // 여기에 다른 주차장 정보 필드 추가
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('확인'),
+            ),
+          ],
+        );
+      },
+    );
   }
 }
