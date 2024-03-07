@@ -44,30 +44,53 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: NaverMap(
-        options: const NaverMapViewOptions(
-          minZoom: 10, // default is 0
-          maxZoom: 16, // default is 21
-          maxTilt: 30, // default is 63
-          initialCameraPosition: NCameraPosition(
-            target:
-                NLatLng(37.36771850000052, 127.1042703539339), // 초기 위치 설정(정자역)
-            zoom: 14.0,
+      body: Stack(
+        children: [
+          NaverMap(
+            options: const NaverMapViewOptions(
+              minZoom: 10, // default is 0
+              maxZoom: 16, // default is 21
+              maxTilt: 30, // default is 63
+              initialCameraPosition: NCameraPosition(
+                target: NLatLng(
+                    37.36771850000052, 127.1042703539339), // 초기 위치 설정(정자역)
+                zoom: 14.0,
+              ),
+            ),
+            onMapReady: (controller) {
+              debugPrint('지도가 준비되었습니다.');
+              _mapController = controller; // 지도 컨트롤러 설정
+            },
           ),
-        ),
-        onMapReady: (controller) {
-          debugPrint('지도가 준비되었습니다.');
-          _mapController = controller; // 지도 컨트롤러 설정
-        },
+          // 네이버맵 위로 쌓여야하기 때문에 뒤에 위치해야함.
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              margin: const EdgeInsets.all(30.0), // margin을 사용하여 상대적인 여백을 지정
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10.0),
+              ),
+              child: const TextField(
+                decoration: InputDecoration(
+                    hintText: '목적지 또는 주소 검색',
+                    border: InputBorder.none,
+                    suffixIcon: Icon(Icons.search)),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 
+  // 지도에 띄울 수 있는 정보창(마커 대신 사용)
   void _addInfoWindows() {
     final controller = _mapController;
     if (controller != null && parkingData.isNotEmpty) {
       for (var parking in parkingData) {
-        // 지도에 띄울 수 있는 정보창(마커 대신 사용)
         final infoWindow = NInfoWindow.onMap(
           id: parking['prkplce_mnnmb'],
           text: "${parking['prkplce_nm']}", // 주차장명
@@ -97,6 +120,9 @@ class _HomePageState extends State<HomePage> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text('주차장명: ${parkingData['prkplce_nm']}'),
+              Text('주차장 구분: ${parkingData['prkplce_clsf']}'),
+              Text('주차단위구획수: ${parkingData['prkucmprt_cnt']}'),
+              Text('요금 구분: ${parkingData['chrge_clsf']}'),
               // 여기에 다른 주차장 정보 필드 추가
             ],
           ),
