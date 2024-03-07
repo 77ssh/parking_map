@@ -6,17 +6,7 @@ import 'package:parking_map/pages/search.dart';
 // import 'package:http/http.dart' as http;
 
 class HomePage extends StatefulWidget {
-  final double? lat;
-  final double? lng;
-
-  const HomePage({
-    super.key,
-    required this.title,
-    required this.lat,
-    required this.lng,
-  });
-
-  final String title;
+  const HomePage({super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -26,6 +16,9 @@ class _HomePageState extends State<HomePage> {
   List<Map<String, dynamic>> parkingData = []; // json 파일 list로 불러오기 위한 코드
   NaverMapController? _mapController; // 지도 컨트롤러 변수 -> 이게 핵심(컨트롤러 활성화)
   Map<String, dynamic> infoWindowsData = {}; // 정보창 데이터를 저장할 맵 변수
+
+  final double _minZoom = 10.0;
+  final double _maxZoom = 16.0;
 
   @override
   void initState() {
@@ -54,11 +47,11 @@ class _HomePageState extends State<HomePage> {
       body: Stack(
         children: [
           NaverMap(
-            options: const NaverMapViewOptions(
-              minZoom: 10, // default is 0
-              maxZoom: 16, // default is 21
+            options: NaverMapViewOptions(
+              minZoom: _minZoom, // default is 0
+              maxZoom: _maxZoom, // default is 21
               maxTilt: 30, // default is 63
-              initialCameraPosition: NCameraPosition(
+              initialCameraPosition: const NCameraPosition(
                 target: NLatLng(
                     37.36771850000052, 127.1042703539339), // 초기 위치 설정(정자역)
                 zoom: 14.0,

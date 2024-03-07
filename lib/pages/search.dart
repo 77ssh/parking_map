@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 // import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
+import 'package:parking_map/common/model.dart';
 import 'dart:convert';
 import 'package:parking_map/pages/home.dart';
 
@@ -13,7 +14,8 @@ class SearchScreen extends StatefulWidget {
 
 class _SearchScreenState extends State<SearchScreen> {
   TextEditingController searchController = TextEditingController();
-  final List<String> _searchHistory = [];
+  // final List<String> _searchHistory = [];
+  final List<SearchItem> _searchHistory = [];
 
   // 실제 효과는 없어서 주석
   // @override
@@ -43,11 +45,15 @@ class _SearchScreenState extends State<SearchScreen> {
       body: ListView.builder(
         itemCount: _searchHistory.length,
         itemBuilder: (context, index) {
-          final searchTerm = _searchHistory[index];
+          final address = _searchHistory[index].address;
           return ListTile(
-            title: Text(searchTerm),
+            title: Text(address ?? ''),
             onTap: () {
-              _search(searchTerm);
+              debugPrint(
+                  'click ${_searchHistory[index].address},${_searchHistory[index].latitude}, ${_searchHistory[index].longitude}');
+              // _search(address ?? '정자역');
+              // 선택 했을 경우 위경도 좌표를 던져서 새롭게 그리게 하면 됨,
+              // 상위 페이지인 홈 페이지의 위경도를 갱신하면 된다.
             },
           );
         },
@@ -82,7 +88,11 @@ class _SearchScreenState extends State<SearchScreen> {
       List<dynamic> addresses = data['addresses'];
       setState(() {
         for (var element in addresses) {
-          _searchHistory.add(element['roadAddress']);
+          String address = element['roadAddress'];
+          double lat = double.parse(element['y']);
+          double lng = double.parse(element['x']);
+          SearchItem addItem = SearchItem(address, lat, lng);
+          _searchHistory.add(addItem);
         }
       });
       if (addresses.isNotEmpty) {
