@@ -2,11 +2,18 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:parking_map/pages/search.dart';
+// import 'package:http/http.dart' as http;
 
 class HomePage extends StatefulWidget {
+  final double? lat;
+  final double? lng;
+
   const HomePage({
     super.key,
     required this.title,
+    required this.lat,
+    required this.lng,
   });
 
   final String title;
@@ -67,17 +74,38 @@ class _HomePageState extends State<HomePage> {
             top: 0,
             left: 0,
             right: 0,
-            child: Container(
-              margin: const EdgeInsets.all(30.0), // margin을 사용하여 상대적인 여백을 지정
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(10.0),
-              ),
-              child: const TextField(
-                decoration: InputDecoration(
-                    hintText: '목적지 또는 주소 검색',
-                    border: InputBorder.none,
-                    suffixIcon: Icon(Icons.search)),
+            child: GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const SearchScreen(),
+                  ),
+                );
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(30.0),
+                child: Container(
+                  // margin: const EdgeInsets.all(30.0), // margin을 사용하여 상대적인 여백을 지정
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                  // 검색창 생성
+                  child: const Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          '목적지 또는 주소 검색',
+                          style: TextStyle(
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ),
+                      Icon(Icons.search),
+                    ],
+                  ),
+                ),
               ),
             ),
           ),
@@ -113,27 +141,31 @@ class _HomePageState extends State<HomePage> {
     showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: const Text('주차장 정보'),
-          content: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('주차장명: ${parkingData['prkplce_nm']}'),
-              Text('주차장 구분: ${parkingData['prkplce_clsf']}'),
-              Text('주차단위구획수: ${parkingData['prkucmprt_cnt']}'),
-              Text('요금 구분: ${parkingData['chrge_clsf']}'),
-              // 여기에 다른 주차장 정보 필드 추가
+        return PopScope(
+          // 확인 버튼 이외의 동작 방지용
+          canPop: false,
+          child: AlertDialog(
+            title: const Text('주차장 정보'),
+            content: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('주차장명: ${parkingData['prkplce_nm']}'),
+                Text('주차장 구분: ${parkingData['prkplce_clsf']}'),
+                Text('주차단위구획수: ${parkingData['prkucmprt_cnt']}'),
+                Text('요금 구분: ${parkingData['chrge_clsf']}'),
+                // 여기에 다른 주차장 정보 필드 추가
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text('확인'),
+              ),
             ],
           ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('확인'),
-            ),
-          ],
         );
       },
     );

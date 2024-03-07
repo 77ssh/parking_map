@@ -21,7 +21,8 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.red),
         useMaterial3: true,
       ),
-      home: const HomePage(title: 'parking_map'),
+      home:
+          const HomePage(title: 'parking_map', lat: 37.517305, lng: 127.047502),
     );
   }
 }
