@@ -15,6 +15,15 @@ class _SearchScreenState extends State<SearchScreen> {
   TextEditingController searchController = TextEditingController();
   final List<String> _searchHistory = [];
 
+  // 실제 효과는 없어서 주석
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   () async {
+  //     _search('인덕원역');
+  //   }();
+  // }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -47,6 +56,7 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   Future<void> _search(String keyword) async {
+    debugPrint('_search call');
     // API 호출을 위한 키워드 인코딩
     String encodedKeyword = Uri.encodeComponent(keyword);
 
@@ -70,11 +80,16 @@ class _SearchScreenState extends State<SearchScreen> {
 
       // 검색 결과에서 좌표 추출
       List<dynamic> addresses = data['addresses'];
+      setState(() {
+        for (var element in addresses) {
+          _searchHistory.add(element['roadAddress']);
+        }
+      });
       if (addresses.isNotEmpty) {
         double lat = double.parse(addresses[0]['y']);
         double lng = double.parse(addresses[0]['x']);
 
-        // 검색 결과를 홈 화면으로 전달하고 페이지 이동
+        /*/ 검색 결과를 홈 화면으로 전달하고 페이지 이동
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
@@ -82,6 +97,8 @@ class _SearchScreenState extends State<SearchScreen> {
                 HomePage(title: 'parking_map', lat: lat, lng: lng),
           ),
         );
+
+      // */
       } else {
         // 검색 결과가 없는 경우 에러 메시지 출력
         ScaffoldMessenger.of(context).showSnackBar(
