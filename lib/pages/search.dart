@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:parking_map/common/model.dart';
 import 'dart:convert';
-import 'package:parking_map/pages/home.dart';
+// import 'package:parking_map/pages/home.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
+import 'package:permission_handler/permission_handler.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -15,6 +17,34 @@ class SearchScreen extends StatefulWidget {
 class _SearchScreenState extends State<SearchScreen> {
   TextEditingController searchController = TextEditingController();
   final List<SearchItem> _searchHistory = [];
+  final stt.SpeechToText _speech = stt.SpeechToText(); // SpeechToText 인스턴스 생성
+
+  // _startListening 함수 정의
+  Future<void> _startListening() async {
+    try {
+      bool available = await _speech.initialize(
+        onError: (error) => debugPrint('Error: $error'),
+        onStatus: (status) => debugPrint('Status: $status'),
+      );
+      if (available) {
+        bool listening = await _speech.listen(
+          onResult: (result) {
+            if (result.finalResult) {
+              searchController.text = result.recognizedWords;
+              _search(result.recognizedWords);
+            }
+          },
+        );
+        if (!listening) {
+          debugPrint('Error starting listening');
+        }
+      } else {
+        debugPrint('Speech recognition not available');
+      }
+    } catch (e) {
+      debugPrint('Error initializing speech recognition: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,10 +52,13 @@ class _SearchScreenState extends State<SearchScreen> {
       appBar: AppBar(
         title: TextField(
           controller: searchController,
-          decoration: const InputDecoration(
+          decoration: InputDecoration(
             hintText: '목적지 또는 주소 검색',
             border: InputBorder.none,
-            suffixIcon: Icon(Icons.search),
+            suffixIcon: IconButton(
+              onPressed: _speakPermission, // 음성인식 시작
+              icon: const Icon(Icons.mic),
+            ),
           ),
           // input 칸의 내용이 바로바로 바뀔 때
           onChanged: (value) {
@@ -94,6 +127,33 @@ class _SearchScreenState extends State<SearchScreen> {
           _searchHistory.add(addItem);
         }
       });
+    }
+  }
+
+  Future<void> _speakPermission() async {
+    Map<Permission, PermissionStatus> status =
+        await [Permission.microphone].request(); // [] 권한배열에 권한을 작성
+
+    if (await Permission.microphone.isGranted) {
+      // 권한이 허용된 경우 음성 인식을 시작합니다.
+      _startListening();
+    } else {
+      // 권한이 거부된 경우 사용자에게 dialog 표시
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('음성인식 허용'),
+          content: const Text('음성검색을 위해서 음성인식 허용이 필요합니다.'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('확인'),
+            ),
+          ],
+        ),
+      );
     }
   }
 }

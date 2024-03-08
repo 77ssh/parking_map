@@ -1,4 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+<!--    <uses-permission android:name="android.permission.권한이름"/>-->
+<uses-permission android:name="android.permission.RECORD_AUDIO" />
+
     <application
         android:label="parking_map"
         android:name="${applicationName}"
