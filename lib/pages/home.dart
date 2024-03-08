@@ -6,7 +6,13 @@ import 'package:parking_map/pages/search.dart';
 // import 'package:http/http.dart' as http;
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  final double selectedLatitude;
+  final double selectedLongitude;
+
+  const HomePage(
+      {super.key,
+      required this.selectedLatitude,
+      required this.selectedLongitude});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -52,11 +58,16 @@ class _HomePageState extends State<HomePage> {
               minZoom: _minZoom, // default is 0
               maxZoom: _maxZoom, // default is 21
               maxTilt: _maxTilt, // default is 63
-              initialCameraPosition: const NCameraPosition(
-                target: NLatLng(
-                    37.36771850000052, 127.1042703539339), // 초기 위치 설정(정자역)
-                zoom: 14.0,
-              ),
+              initialCameraPosition: widget.selectedLongitude != null
+                  ? NCameraPosition(
+                      target: NLatLng(
+                          widget.selectedLatitude, widget.selectedLongitude),
+                      zoom: 14.0)
+                  : const NCameraPosition(
+                      target: NLatLng(37.36771850000052,
+                          127.1042703539339), // 초기 위치 설정(정자역)
+                      zoom: 14.0,
+                    ),
             ),
             onMapReady: (controller) {
               debugPrint('지도가 준비되었습니다.');

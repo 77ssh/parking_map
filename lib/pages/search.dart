@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 // import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:parking_map/common/model.dart';
+import 'package:parking_map/pages/home.dart';
 import 'dart:convert';
 // import 'package:parking_map/pages/home.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
@@ -78,6 +79,15 @@ class _SearchScreenState extends State<SearchScreen> {
               // _search(address ?? '정자역');
               // 선택 했을 경우 위경도 좌표를 던져서 새롭게 그리게 하면 됨,
               // 상위 페이지인 홈 페이지의 위경도를 갱신하면 된다.
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => HomePage(
+                    selectedLatitude: _searchHistory[index].latitude ?? 0.0,
+                    selectedLongitude: _searchHistory[index].longitude ?? 0.0,
+                  ),
+                ),
+              );
             },
           );
         },
