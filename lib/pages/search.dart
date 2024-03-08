@@ -14,17 +14,7 @@ class SearchScreen extends StatefulWidget {
 
 class _SearchScreenState extends State<SearchScreen> {
   TextEditingController searchController = TextEditingController();
-  // final List<String> _searchHistory = [];
   final List<SearchItem> _searchHistory = [];
-
-  // 실제 효과는 없어서 주석
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   () async {
-  //     _search('인덕원역');
-  //   }();
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +27,8 @@ class _SearchScreenState extends State<SearchScreen> {
             border: InputBorder.none,
             suffixIcon: Icon(Icons.search),
           ),
-          onSubmitted: (value) {
+          // input 칸의 내용이 바로바로 바뀔 때
+          onChanged: (value) {
             _search(value);
           },
         ),
@@ -62,6 +53,13 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   Future<void> _search(String keyword) async {
+    if (keyword.isEmpty) {
+      // 검색어가 없을 경우 _serachhistory 데이터 초기화
+      setState(() {
+        _searchHistory.clear();
+      });
+      return;
+    }
     debugPrint('_search call');
     // API 호출을 위한 키워드 인코딩
     String encodedKeyword = Uri.encodeComponent(keyword);
@@ -85,41 +83,17 @@ class _SearchScreenState extends State<SearchScreen> {
       Map<String, dynamic> data = json.decode(response.body);
 
       // 검색 결과에서 좌표 추출
-      List<dynamic> addresses = data['addresses'];
+      List<dynamic> addresses =
+          ((data['addresses'] ?? []) as List); // list에서 null 값 허용해줘야함
       setState(() {
         for (var element in addresses) {
-          String address = element['roadAddress'];
-          double lat = double.parse(element['y']);
-          double lng = double.parse(element['x']);
-          SearchItem addItem = SearchItem(address, lat, lng);
+          String? address = element['roadAddress'];
+          double? lat = double.parse(element['y']);
+          double? lng = double.parse(element['x']);
+          SearchItem? addItem = SearchItem(address, lat, lng);
           _searchHistory.add(addItem);
         }
       });
-      if (addresses.isNotEmpty) {
-        double lat = double.parse(addresses[0]['y']);
-        double lng = double.parse(addresses[0]['x']);
-
-        /*/ 검색 결과를 홈 화면으로 전달하고 페이지 이동
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) =>
-                HomePage(title: 'parking_map', lat: lat, lng: lng),
-          ),
-        );
-
-      // */
-      } else {
-        // 검색 결과가 없는 경우 에러 메시지 출력
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('검색 결과가 없습니다.')),
-        );
-      }
-    } else {
-      // API 호출 실패 시 에러 메시지 출력
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('검색 중 오류가 발생했습니다.')),
-      );
     }
   }
 }

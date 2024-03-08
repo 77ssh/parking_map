@@ -19,6 +19,7 @@ class _HomePageState extends State<HomePage> {
 
   final double _minZoom = 10.0;
   final double _maxZoom = 16.0;
+  final double _maxTilt = 30.0;
 
   @override
   void initState() {
@@ -50,7 +51,7 @@ class _HomePageState extends State<HomePage> {
             options: NaverMapViewOptions(
               minZoom: _minZoom, // default is 0
               maxZoom: _maxZoom, // default is 21
-              maxTilt: 30, // default is 63
+              maxTilt: _maxTilt, // default is 63
               initialCameraPosition: const NCameraPosition(
                 target: NLatLng(
                     37.36771850000052, 127.1042703539339), // 초기 위치 설정(정자역)
