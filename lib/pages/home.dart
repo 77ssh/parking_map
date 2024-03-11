@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:parking_map/pages/search.dart';
+import 'package:parking_map/pages/star.dart';
+import 'package:parking_map/pages/mypageview.dart';
 // import 'package:http/http.dart' as http;
 
 class HomePage extends StatefulWidget {
@@ -81,10 +83,13 @@ class _HomePageState extends State<HomePage> {
                   widget.selectedLongitude != 127.1042703539339) {
                 _addMarker(widget.selectedLatitude, widget.selectedLongitude);
                 _addInfoWindows(); // 데이터 로드가 완료되면 정보창 추가
+                // 비동기 처리보다 동기 처리가 차라리 더빠름..
               }
             },
           ),
+
           // 네이버맵 위로 쌓여야하기 때문에 뒤에 위치해야함.
+          // appbar 역할을 하는 컨테이너
           Positioned(
             top: 0,
             left: 0,
@@ -121,6 +126,71 @@ class _HomePageState extends State<HomePage> {
                     ],
                   ),
                 ),
+              ),
+            ),
+          ),
+
+          // bottomnavigationbar 역할을 하는 컨테이너
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              height: MediaQuery.of(context).size.height * 0.12, // 화면 높이의 12%
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.3), // 그림자 색상 및 투명도 설정
+                    spreadRadius: 5, // 그림자의 확산 정도
+                    blurRadius: 7, // 그림자의 흐릿한 정도
+                    offset: const Offset(0, 3), // 그림자의 위치 조정 (수평, 수직)
+                  ),
+                ],
+              ),
+              child: Column(
+                children: [
+                  Align(
+                    alignment: Alignment.topCenter,
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 15.0),
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const StarPage()),
+                          );
+                        },
+                        child: RichText(
+                          text: TextSpan(
+                            style: DefaultTextStyle.of(context).style,
+                            children: [
+                              TextSpan(
+                                text: ' ⭐ 즐겨찾기',
+                                style: Theme.of(context).textTheme.bodyLarge,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  // 즐겨찾기 밑에 들어갈 pageview 적용된 컨테이너 추가하기
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(15.0),
+                    child: Container(
+                      height: MediaQuery.of(context).size.height * 0.01,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const MyPageView(),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
