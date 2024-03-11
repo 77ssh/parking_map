@@ -22,8 +22,9 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       home: const HomePage(
-          selectedLatitude: 37.36771850000052,
-          selectedLongitude: 127.1042703539339),
-    );
+        selectedLatitude: 37.36771852000005,
+        selectedLongitude: 127.1042703539339,
+      ),
+    ); // 초기 위치 설정(정자역)
   }
 }

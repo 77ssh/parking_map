@@ -20,7 +20,7 @@ class _SearchScreenState extends State<SearchScreen> {
   final List<SearchItem> _searchHistory = [];
   final stt.SpeechToText _speech = stt.SpeechToText(); // SpeechToText 인스턴스 생성
 
-  // _startListening 함수 정의
+  // _startListening 함수 정의 -> 음성 인식 핵심 요소
   Future<void> _startListening() async {
     try {
       bool available = await _speech.initialize(
@@ -140,12 +140,13 @@ class _SearchScreenState extends State<SearchScreen> {
     }
   }
 
+  // 음성 인식 허용 권한 함수
   Future<void> _speakPermission() async {
-    Map<Permission, PermissionStatus> status =
-        await [Permission.microphone].request(); // [] 권한배열에 권한을 작성
+    Map<Permission, PermissionStatus> status = await [Permission.microphone]
+        .request(); // [] 권한배열에 권한을 작성 -> 여기서는 음성인식만
 
     if (await Permission.microphone.isGranted) {
-      // 권한이 허용된 경우 음성 인식을 시작합니다.
+      // 권한이 허용된 경우 음성 인식을 시작합니다. -> 중요
       _startListening();
     } else {
       // 권한이 거부된 경우 사용자에게 dialog 표시

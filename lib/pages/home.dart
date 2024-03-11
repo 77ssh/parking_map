@@ -1,3 +1,5 @@
+// ignore_for_file: unnecessary_null_comparison
+
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
@@ -62,9 +64,10 @@ class _HomePageState extends State<HomePage> {
                   ? NCameraPosition(
                       target: NLatLng(
                           widget.selectedLatitude, widget.selectedLongitude),
-                      zoom: 14.0)
+                      zoom: 14.0,
+                    )
                   : const NCameraPosition(
-                      target: NLatLng(37.36771850000052,
+                      target: NLatLng(37.36771852000005,
                           127.1042703539339), // 초기 위치 설정(정자역)
                       zoom: 14.0,
                     ),
@@ -72,6 +75,12 @@ class _HomePageState extends State<HomePage> {
             onMapReady: (controller) {
               debugPrint('지도가 준비되었습니다.');
               _mapController = controller; // 지도 컨트롤러 설정
+              if (widget.selectedLatitude != null &&
+                  widget.selectedLongitude != null &&
+                  widget.selectedLatitude != 37.36771852000005 &&
+                  widget.selectedLongitude != 127.1042703539339) {
+                _addMarker(widget.selectedLatitude, widget.selectedLongitude);
+              }
             },
           ),
           // 네이버맵 위로 쌓여야하기 때문에 뒤에 위치해야함.
@@ -119,7 +128,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // 지도에 띄울 수 있는 정보창(마커 대신 사용)
+  // 지도에 띄울 수 있는 정보창(json 파일에서 불러올 데이터 선택헤서 불러옴)
   void _addInfoWindows() {
     final controller = _mapController;
     if (controller != null && parkingData.isNotEmpty) {
@@ -131,13 +140,23 @@ class _HomePageState extends State<HomePage> {
               parking['prkplce_lo']), // 주차장 표시하는 위치(경도,위도)
         );
         controller.addOverlay(infoWindow);
-
         // 정보창에 터치 이벤트 리스너 등록
         infoWindow.setOnTapListener((NInfoWindow infoWindow) {
           _showParkingDetails(
               parking); // 터치 이벤트 리스너 등록의 핵심코드(json 불러오는 parking으로 해결)
         });
       }
+    }
+  }
+
+  // 검색으로 불러온 위치정보에 마커 추가
+  void _addMarker(double latitude, double longitude) {
+    if (_mapController != null) {
+      final marker = NMarker(
+        id: '',
+        position: NLatLng(widget.selectedLatitude, widget.selectedLongitude),
+      );
+      _mapController!.addOverlay(marker);
     }
   }
 
