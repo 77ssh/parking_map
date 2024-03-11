@@ -80,6 +80,7 @@ class _HomePageState extends State<HomePage> {
                   widget.selectedLatitude != 37.36771852000005 &&
                   widget.selectedLongitude != 127.1042703539339) {
                 _addMarker(widget.selectedLatitude, widget.selectedLongitude);
+                _addInfoWindows(); // 데이터 로드가 완료되면 정보창 추가
               }
             },
           ),
