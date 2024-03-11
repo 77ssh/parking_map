@@ -151,18 +151,23 @@ class _SearchScreenState extends State<SearchScreen> {
       // 권한이 거부된 경우 사용자에게 dialog 표시
       showDialog(
         context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('음성인식 허용'),
-          content: const Text('음성검색을 위해서 음성인식 허용이 필요합니다.'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text('확인'),
+        builder: (context) {
+          return PopScope(
+            canPop: false,
+            child: AlertDialog(
+              title: const Text('음성인식 허용'),
+              content: const Text('음성검색을 위해서 음성인식 허용이 필요합니다.'),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Text('확인'),
+                ),
+              ],
             ),
-          ],
-        ),
+          );
+        },
       );
     }
   }

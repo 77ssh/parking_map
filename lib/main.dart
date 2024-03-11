@@ -21,7 +21,9 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.red),
         useMaterial3: true,
       ),
-      home: const HomePage(),
+      home: const HomePage(
+          selectedLatitude: 37.36771850000052,
+          selectedLongitude: 127.1042703539339),
     );
   }
 }
