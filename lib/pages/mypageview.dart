@@ -25,7 +25,7 @@ class _MyPageViewState extends State<MyPageView> {
       }
       _pageController.animateToPage(
         _currentPage,
-        duration: const Duration(milliseconds: 500),
+        duration: const Duration(milliseconds: 1500),
         curve: Curves.easeInOut,
       );
     });
@@ -40,11 +40,15 @@ class _MyPageViewState extends State<MyPageView> {
 
   @override
   Widget build(BuildContext context) {
-    return PageView(
+    return PageView.builder(
       controller: _pageController,
-      children: [
-        Container(
-          color: Colors.grey,
+      itemBuilder: (BuildContext context, int index) {
+        final pageIndex = index % 3; // 페이지 인덱스를 0부터 2까지 순환
+        return Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(7),
+            color: Colors.greenAccent,
+          ),
           child: Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -54,7 +58,7 @@ class _MyPageViewState extends State<MyPageView> {
                     style: DefaultTextStyle.of(context).style,
                     children: [
                       TextSpan(
-                        text: '테스트 1',
+                        text: '테스트 ${pageIndex + 1}',
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
                     ],
@@ -63,50 +67,8 @@ class _MyPageViewState extends State<MyPageView> {
               ],
             ),
           ),
-        ),
-        Container(
-          color: Colors.grey,
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                RichText(
-                  text: TextSpan(
-                    style: DefaultTextStyle.of(context).style,
-                    children: [
-                      TextSpan(
-                        text: '테스트 2',
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        Container(
-          color: Colors.grey,
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                RichText(
-                  text: TextSpan(
-                    style: DefaultTextStyle.of(context).style,
-                    children: [
-                      TextSpan(
-                        text: '테스트 3',
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
+        );
+      },
     );
   }
 }

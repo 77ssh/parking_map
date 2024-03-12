@@ -2,12 +2,13 @@
 
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:parking_map/pages/search.dart';
 import 'package:parking_map/pages/star.dart';
+import 'package:parking_map/pages/filter.dart';
 import 'package:parking_map/pages/mypageview.dart';
-// import 'package:http/http.dart' as http;
 
 class HomePage extends StatefulWidget {
   final double selectedLatitude;
@@ -55,6 +56,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: Stack(
         children: [
           NaverMap(
@@ -94,37 +96,86 @@ class _HomePageState extends State<HomePage> {
             top: 0,
             left: 0,
             right: 0,
-            child: GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const SearchScreen(),
-                  ),
-                );
-              },
-              child: Padding(
-                padding: const EdgeInsets.all(30.0),
-                child: Container(
-                  // margin: const EdgeInsets.all(30.0), // margin을 사용하여 상대적인 여백을 지정
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
-                  // 검색창 생성
-                  child: const Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          '목적지 또는 주소 검색',
-                          style: TextStyle(
-                            color: Colors.grey,
+            child: Padding(
+              padding: const EdgeInsets.all(30.0),
+              child: Container(
+                height: MediaQuery.of(context).size.height * 0.12, // 화면 높이의 12%
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
+                // 검색창 생성
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Align(
+                            alignment: Alignment.topCenter,
+                            child: Padding(
+                              padding:
+                                  const EdgeInsets.only(top: 8.0, bottom: 4.0),
+                              child: GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          const SearchScreen(),
+                                    ),
+                                  );
+                                },
+                                child: const Text(
+                                  '목적지 또는 주소 검색',
+                                  style: TextStyle(
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                              ),
+                            ),
                           ),
                         ),
-                      ),
-                      Icon(Icons.search),
-                    ],
-                  ),
+                        const Icon(Icons.search),
+                      ],
+                    ),
+                    const Divider(
+                      // 화면 중간에 얇은 선 추가 해서 보기 좋게 함
+                      color: Colors.grey,
+                      thickness: 0.5,
+                    ),
+                    Row(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 4.0),
+                            child: GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const FilterPage(),
+                                  ),
+                                );
+                              },
+                              child: RichText(
+                                text: TextSpan(
+                                  style: DefaultTextStyle.of(context).style,
+                                  children: [
+                                    TextSpan(
+                                      text: ' ✔ 필터',
+                                      style:
+                                          Theme.of(context).textTheme.bodyLarge,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -136,7 +187,7 @@ class _HomePageState extends State<HomePage> {
             left: 0,
             right: 0,
             child: Container(
-              height: MediaQuery.of(context).size.height * 0.12, // 화면 높이의 12%
+              height: MediaQuery.of(context).size.height * 0.15, // 화면 높이의 15%
               decoration: BoxDecoration(
                 color: Colors.white,
                 boxShadow: [
@@ -178,15 +229,13 @@ class _HomePageState extends State<HomePage> {
                   ),
                   // 즐겨찾기 밑에 들어갈 pageview 적용된 컨테이너 추가하기
                   const SizedBox(
-                    height: 10,
+                    height: 20,
                   ),
                   Padding(
-                    padding: const EdgeInsets.all(15.0),
-                    child: Container(
-                      height: MediaQuery.of(context).size.height * 0.01,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 25.0), // 가로 방향으로만 패딩 추가
+                    child: SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.05,
                       child: const MyPageView(),
                     ),
                   ),
