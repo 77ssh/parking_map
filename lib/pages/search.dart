@@ -73,13 +73,13 @@ class _SearchScreenState extends State<SearchScreen> {
           final address = _searchHistory[index].address;
           return ListTile(
             title: Text(address ?? ''),
-            onTap: () {
+            onTap: () async {
               debugPrint(
                   'click ${_searchHistory[index].address},${_searchHistory[index].latitude}, ${_searchHistory[index].longitude}');
               // _search(address ?? '정자역');
               // 선택 했을 경우 위경도 좌표를 던져서 새롭게 그리게 하면 됨,
               // 상위 페이지인 홈 페이지의 위경도를 갱신하면 된다.
-              Navigator.push(
+              await Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) => HomePage(

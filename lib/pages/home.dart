@@ -76,15 +76,16 @@ class _HomePageState extends State<HomePage> {
                       zoom: 14.0,
                     ),
             ),
-            onMapReady: (controller) {
+            onMapReady: (controller) async {
               debugPrint('지도가 준비되었습니다.');
               _mapController = controller; // 지도 컨트롤러 설정
               if (widget.selectedLatitude != null &&
                   widget.selectedLongitude != null &&
                   widget.selectedLatitude != 37.36771852000005 &&
                   widget.selectedLongitude != 127.1042703539339) {
-                _addMarker(widget.selectedLatitude, widget.selectedLongitude);
-                _addInfoWindows(); // 데이터 로드가 완료되면 정보창 추가
+                await _addMarker(
+                    widget.selectedLatitude, widget.selectedLongitude);
+                await _addInfoWindows(); // 데이터 로드가 완료되면 정보창 추가
                 // 비동기 처리보다 동기 처리가 차라리 더빠름..
               }
             },
@@ -249,7 +250,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   // 지도에 띄울 수 있는 정보창(json 파일에서 불러올 데이터 선택헤서 불러옴)
-  void _addInfoWindows() {
+  Future<void> _addInfoWindows() async {
     final controller = _mapController;
     if (controller != null && parkingData.isNotEmpty) {
       for (var parking in parkingData) {
@@ -259,7 +260,7 @@ class _HomePageState extends State<HomePage> {
           position: NLatLng(parking['prkplce_la'],
               parking['prkplce_lo']), // 주차장 표시하는 위치(경도,위도)
         );
-        controller.addOverlay(infoWindow);
+        await controller.addOverlay(infoWindow);
         // 정보창에 터치 이벤트 리스너 등록
         infoWindow.setOnTapListener((NInfoWindow infoWindow) {
           _showParkingDetails(
@@ -270,14 +271,17 @@ class _HomePageState extends State<HomePage> {
   }
 
   // 검색으로 불러온 위치정보에 마커 추가
-  void _addMarker(double latitude, double longitude) {
+  Future<NMarker?> _addMarker(double latitude, double longitude) {
     if (_mapController != null) {
       final marker = NMarker(
         id: '',
         position: NLatLng(widget.selectedLatitude, widget.selectedLongitude),
       );
       _mapController!.addOverlay(marker);
+      return Future.value(marker); // 마커를 Future로 감싸서 반환
     }
+    // 지도 컨트롤러가 null이면 null을 Future로 감싸서 반환
+    return Future.value(null);
   }
 
   // 주차장 정보를 보여주는 다이얼로그 표시
