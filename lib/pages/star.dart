@@ -7,7 +7,7 @@ class StarPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('즐겨찾기 페이지'),
+        title: const Text('즐겨찾기 목록'),
       ),
       body: const Center(
         child: Text(

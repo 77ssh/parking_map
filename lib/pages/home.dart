@@ -2,7 +2,7 @@
 
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+// import 'package:flutter/widgets.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:parking_map/pages/search.dart';
@@ -27,6 +27,7 @@ class _HomePageState extends State<HomePage> {
   List<Map<String, dynamic>> parkingData = []; // json 파일 list로 불러오기 위한 코드
   NaverMapController? _mapController; // 지도 컨트롤러 변수 -> 이게 핵심(컨트롤러 활성화)
   Map<String, dynamic> infoWindowsData = {}; // 정보창 데이터를 저장할 맵 변수
+  bool isFavorite = false; // 즐겨찾기 여부를 저장하는 변수
 
   final double _minZoom = 10.0;
   final double _maxZoom = 16.0;
@@ -293,7 +294,24 @@ class _HomePageState extends State<HomePage> {
           // 확인 버튼 이외의 동작 방지용
           canPop: false,
           child: AlertDialog(
-            title: const Text('주차장 정보'),
+            title: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('주차장 정보'),
+                IconButton(
+                  icon: Icon(
+                    isFavorite ? Icons.star : Icons.star_border,
+                    color: isFavorite ? Colors.yellow : null,
+                  ),
+                  onPressed: () {
+                    debugPrint('버튼 눌렀는지 확인');
+                    setState(() {
+                      isFavorite = !isFavorite;
+                    });
+                  },
+                ),
+              ],
+            ),
             content: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
@@ -302,6 +320,10 @@ class _HomePageState extends State<HomePage> {
                 Text('주차장 구분: ${parkingData['prkplce_clsf']}'),
                 Text('주차단위구획수: ${parkingData['prkucmprt_cnt']}'),
                 Text('요금 구분: ${parkingData['chrge_clsf']}'),
+                const SizedBox(
+                  height: 30.0,
+                ),
+                const Text('* 즐겨찾기 버튼을 누른 후 확인 버튼을 누르면 적용됩니다.')
                 // 여기에 다른 주차장 정보 필드 추가
               ],
             ),
