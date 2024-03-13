@@ -9,6 +9,7 @@ import 'package:parking_map/pages/search.dart';
 import 'package:parking_map/pages/star.dart';
 import 'package:parking_map/pages/filter.dart';
 import 'package:parking_map/pages/mypageview.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomePage extends StatefulWidget {
   final double selectedLatitude;
@@ -286,7 +287,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   // 주차장 정보를 보여주는 다이얼로그 표시
-  void _showParkingDetails(Map<String, dynamic> parkingData) {
+  void _showParkingDetails(Map<String, dynamic> parkingData) async {
     showDialog(
       context: context,
       builder: (context) {
@@ -303,11 +304,16 @@ class _HomePageState extends State<HomePage> {
                     isFavorite ? Icons.star : Icons.star_border,
                     color: isFavorite ? Colors.yellow : null,
                   ),
-                  onPressed: () {
+                  onPressed: () async {
                     debugPrint('버튼 눌렀는지 확인');
                     setState(() {
                       isFavorite = !isFavorite;
                     });
+
+                    if (isFavorite) {
+                      // isFavorite가 true인 경우 주차장 정보를 저장
+                      await _saveFavoriteParking(parkingData);
+                    }
                   },
                 ),
               ],
@@ -339,5 +345,25 @@ class _HomePageState extends State<HomePage> {
         );
       },
     );
+  }
+
+// 즐겨찾기에 주차장 정보 저장
+  Future<void> _saveFavoriteParking(Map<String, dynamic> parkingData) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    // 기존 즐겨찾기 목록을 불러오거나 빈 목록을 초기화합니다.
+    List<String> favoriteParkingList =
+        prefs.getStringList('favoriteParkingList') ?? [];
+
+    // 현재 주차장의 이름을 즐겨찾기 목록에 추가합니다.
+    final String parkingName = parkingData['prkplce_nm'];
+    favoriteParkingList.add(parkingName);
+
+    debugPrint('주차장 이름: $parkingName');
+
+    // 갱신된 즐겨찾기 목록을 저장합니다.
+    await prefs.setStringList('favoriteParkingList', favoriteParkingList);
+
+    debugPrint('주차장 정보가 즐겨찾기에 추가되었습니다.');
   }
 }
