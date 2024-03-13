@@ -313,6 +313,11 @@ class _HomePageState extends State<HomePage> {
                     if (isFavorite) {
                       // isFavorite가 true인 경우 주차장 정보를 저장
                       await _saveFavoriteParking(parkingData);
+
+                    } else {
+                      (!isFavorite) {
+                        await _removeFavoriteParking(parkingData);
+                    };
                     }
                   },
                 ),
@@ -365,5 +370,25 @@ class _HomePageState extends State<HomePage> {
     await prefs.setStringList('favoriteParkingList', favoriteParkingList);
 
     debugPrint('주차장 정보가 즐겨찾기에 추가되었습니다.');
+  }
+
+  // 즐겨찾기에 주차장 정보 삭제
+  Future<void> _removeFavoriteParking(Map<String, dynamic> parkingData) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    // 기존 즐겨찾기 목록을 불러오거나 빈 목록을 초기화합니다.
+    List<String> favoriteParkingList =
+        prefs.getStringList('favoriteParkingList') ?? [];
+
+    // 현재 주차장의 이름을 즐겨찾기 목록에 추가합니다.
+    final String parkingName = parkingData['prkplce_nm'];
+    favoriteParkingList.remove(parkingName);
+
+    debugPrint('주차장 삭제: $parkingName');
+
+    // 갱신된 즐겨찾기 목록을 저장합니다.
+    await prefs.setStringList('favoriteParkingList', favoriteParkingList);
+
+    debugPrint('주차장 정보가 즐겨찾기에서 삭제되었습니다.');
   }
 }
