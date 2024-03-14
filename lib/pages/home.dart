@@ -401,6 +401,9 @@ class _HomePageState extends State<HomePage> {
 
     // 현재 주차장의 이름을 즐겨찾기 목록에서 제거합니다.
     favoriteParkingList.removeWhere((name) => name == parkingName);
+    setState(() {
+      favoriteStatusMap[parkingName] = false; // 해당 주차장의 즐겨찾기 상태 업데이트
+    });
 
     debugPrint('주차장 삭제: $parkingName');
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 
 class StarPage extends StatefulWidget {
   const StarPage({super.key});
@@ -10,6 +11,7 @@ class StarPage extends StatefulWidget {
 
 class _StarPageState extends State<StarPage> {
   List<String> favoriteParkingList = [];
+  Map<String, bool> favoriteStatusMap = {};
 
   @override
   void initState() {
@@ -27,6 +29,17 @@ class _StarPageState extends State<StarPage> {
         favoriteParkingList = favoriteList;
       });
     }
+  }
+
+  Future<void> _removeFavoriteParking(String parkingName) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<String> updatedList =
+        favoriteParkingList.where((name) => name != parkingName).toList();
+    setState(() {
+      favoriteParkingList = updatedList;
+      favoriteStatusMap[parkingName] = false; // 해당 주차장의 즐겨찾기 상태 업데이트
+    });
+    await prefs.setStringList('favoriteParkingList', updatedList);
   }
 
   @override
@@ -55,21 +68,34 @@ class _StarPageState extends State<StarPage> {
               ),
             ),
             const SizedBox(height: 20.0),
-            // 여기에 favoriteParkingList를 사용하여 즐겨찾기 목록을 표시하는 위젯을 추가하세요.
-            favoriteParkingList.isNotEmpty
-                ? ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: favoriteParkingList.length,
-                    itemBuilder: (context, index) {
-                      return ListTile(
-                        title: Text(favoriteParkingList[index]),
-                      );
-                    },
-                  )
-                : const Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: Text(' 즐겨찾기 목록이 없습니다.'),
+            ListView.separated(
+              shrinkWrap: true,
+              separatorBuilder: (context, index) => const Divider(),
+              itemCount: favoriteParkingList.length,
+              itemBuilder: (context, index) {
+                final parkingName = favoriteParkingList[index];
+                return Slidable(
+                  endActionPane: ActionPane(
+                    motion: const ScrollMotion(),
+                    extentRatio: 0.25,
+                    children: [
+                      SlidableAction(
+                        label: '삭제',
+                        backgroundColor: Colors.red,
+                        // icon: Icons.delete,
+                        onPressed: (context) {
+                          _removeFavoriteParking(parkingName);
+                          debugPrint('삭제 확인하기: $parkingName');
+                        },
+                      ),
+                    ],
                   ),
+                  child: ListTile(
+                    title: Text(parkingName),
+                  ),
+                );
+              },
+            ),
           ],
         ),
       ),
