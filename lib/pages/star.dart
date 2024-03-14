@@ -5,7 +5,7 @@ class StarPage extends StatefulWidget {
   const StarPage({super.key});
 
   @override
-  _StarPageState createState() => _StarPageState();
+  State<StarPage> createState() => _StarPageState();
 }
 
 class _StarPageState extends State<StarPage> {

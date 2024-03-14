@@ -29,6 +29,7 @@ class _HomePageState extends State<HomePage> {
   NaverMapController? _mapController; // 지도 컨트롤러 변수 -> 이게 핵심(컨트롤러 활성화)
   Map<String, dynamic> infoWindowsData = {}; // 정보창 데이터를 저장할 맵 변수
   bool isFavorite = false; // 즐겨찾기 여부를 저장하는 변수
+  Map<String, bool> favoriteStatusMap = {}; // 각 주차장의 즐겨찾기 상태를 저장하는 맵
 
   final double _minZoom = 10.0;
   final double _maxZoom = 16.0;
@@ -38,6 +39,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _loadParkingData();
+    _loadFavoriteStatus();
   }
 
   // json 파일 불러오기
@@ -52,6 +54,19 @@ class _HomePageState extends State<HomePage> {
       await _addInfoWindows();
     } catch (e) {
       debugPrint('주차 데이터 로드 실패: $e');
+    }
+  }
+
+  Future<void> _loadFavoriteStatus() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final List<String>? favoriteList =
+        prefs.getStringList('favoriteParkingList');
+    if (favoriteList != null) {
+      setState(() {
+        for (String parkingName in favoriteList) {
+          favoriteStatusMap[parkingName] = true;
+        }
+      });
     }
   }
 
@@ -288,6 +303,10 @@ class _HomePageState extends State<HomePage> {
 
   // 주차장 정보를 보여주는 다이얼로그 표시
   void _showParkingDetails(Map<String, dynamic> parkingData) async {
+    final String parkingName = parkingData['prkplce_nm'];
+    final bool isFavorite =
+        favoriteStatusMap[parkingName] ?? false; // 해당 주차장의 즐겨찾기 상태 가져오기
+
     showDialog(
       context: context,
       builder: (context) {
@@ -307,15 +326,18 @@ class _HomePageState extends State<HomePage> {
                   onPressed: () async {
                     debugPrint('버튼 눌렀는지 확인');
                     setState(() {
-                      isFavorite = !isFavorite;
+                      // 해당 주차장의 즐겨찾기 상태 토글
+                      favoriteStatusMap[parkingName] =
+                          !(favoriteStatusMap[parkingName] ?? false);
                     });
 
-                    if (isFavorite) {
-                      // isFavorite가 true인 경우 주차장 정보를 저장
-                      await _saveFavoriteParking(parkingData);
+                    // 상태 변경 저장
+                    if (favoriteStatusMap[parkingName] ?? false) {
+                      // 즐겨찾기 상태인 경우 저장
+                      await _saveFavoriteParking(parkingName);
                     } else {
-                      // isFavorite가 false인 경우 주차장 정보를 제거
-                      await _removeFavoriteParking(parkingData['prkplce_nm']);
+                      // 즐겨찾기 상태가 아닌 경우 제거
+                      await _removeFavoriteParking(parkingName);
                     }
                   },
                 ),
@@ -351,7 +373,7 @@ class _HomePageState extends State<HomePage> {
   }
 
 // 즐겨찾기에 주차장 정보 저장
-  Future<void> _saveFavoriteParking(Map<String, dynamic> parkingData) async {
+  Future<void> _saveFavoriteParking(String parkingName) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
 
     // 기존 즐겨찾기 목록을 불러오거나 빈 목록을 초기화합니다.
@@ -359,7 +381,6 @@ class _HomePageState extends State<HomePage> {
         prefs.getStringList('favoriteParkingList') ?? [];
 
     // 현재 주차장의 이름을 즐겨찾기 목록에 추가합니다.
-    final String parkingName = parkingData['prkplce_nm'];
     favoriteParkingList.add(parkingName);
 
     debugPrint('주차장 이름: $parkingName');
