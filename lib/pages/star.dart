@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
 
 class StarPage extends StatefulWidget {
   const StarPage({super.key});
@@ -11,7 +10,6 @@ class StarPage extends StatefulWidget {
 
 class _StarPageState extends State<StarPage> {
   List<String> favoriteParkingList = [];
-  Map<String, bool> favoriteStatusMap = {};
 
   @override
   void initState() {
@@ -29,17 +27,6 @@ class _StarPageState extends State<StarPage> {
         favoriteParkingList = favoriteList;
       });
     }
-  }
-
-  Future<void> _removeFavoriteParking(String parkingName) async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<String> updatedList =
-        favoriteParkingList.where((name) => name != parkingName).toList();
-    setState(() {
-      favoriteParkingList = updatedList;
-      favoriteStatusMap[parkingName] = false; // 해당 주차장의 즐겨찾기 상태 업데이트
-    });
-    await prefs.setStringList('favoriteParkingList', updatedList);
   }
 
   @override
@@ -73,26 +60,8 @@ class _StarPageState extends State<StarPage> {
               separatorBuilder: (context, index) => const Divider(),
               itemCount: favoriteParkingList.length,
               itemBuilder: (context, index) {
-                final parkingName = favoriteParkingList[index];
-                return Slidable(
-                  endActionPane: ActionPane(
-                    motion: const ScrollMotion(),
-                    extentRatio: 0.25,
-                    children: [
-                      SlidableAction(
-                        label: '삭제',
-                        backgroundColor: Colors.red,
-                        // icon: Icons.delete,
-                        onPressed: (context) {
-                          _removeFavoriteParking(parkingName);
-                          debugPrint('삭제 확인하기: $parkingName');
-                        },
-                      ),
-                    ],
-                  ),
-                  child: ListTile(
-                    title: Text(parkingName),
-                  ),
+                return ListTile(
+                  title: Text(favoriteParkingList[index]),
                 );
               },
             ),

@@ -304,6 +304,9 @@ class _HomePageState extends State<HomePage> {
   // 주차장 정보를 보여주는 다이얼로그 표시
   void _showParkingDetails(Map<String, dynamic> parkingData) async {
     final String parkingName = parkingData['prkplce_nm'];
+    final double parkingLa = parkingData['prkplce_la'];
+    final double parkingLo = parkingData['prkplce_lo'];
+
     final bool isFavorite =
         favoriteStatusMap[parkingName] ?? false; // 해당 주차장의 즐겨찾기 상태 가져오기
 
