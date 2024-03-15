@@ -2,7 +2,6 @@
 
 import 'dart:convert';
 import 'package:flutter/material.dart';
-// import 'package:flutter/widgets.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:parking_map/pages/search.dart';
@@ -10,6 +9,8 @@ import 'package:parking_map/pages/star.dart';
 import 'package:parking_map/pages/filter.dart';
 import 'package:parking_map/pages/mypageview.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+enum FilterOption { free, paid, mixed, all } // 필터링 옵션들
 
 class HomePage extends StatefulWidget {
   final double selectedLatitude;
@@ -30,6 +31,8 @@ class _HomePageState extends State<HomePage> {
   Map<String, dynamic> infoWindowsData = {}; // 정보창 데이터를 저장할 맵 변수
   bool isFavorite = false; // 즐겨찾기 여부를 저장하는 변수
   Map<String, bool> favoriteStatusMap = {}; // 각 주차장의 즐겨찾기 상태를 저장하는 맵
+  List<Map<String, dynamic>> filteredParkingData = []; // 필터링된 주차장 데이터를 저장할 리스트
+  FilterOption selectedFilterOption = FilterOption.all; // 현재 선택된 필터 옵션
 
   final double _minZoom = 10.0;
   final double _maxZoom = 16.0;
@@ -57,6 +60,7 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  // 즐겨찾기 상태 불러오기
   Future<void> _loadFavoriteStatus() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final List<String>? favoriteList =
@@ -67,6 +71,56 @@ class _HomePageState extends State<HomePage> {
           favoriteStatusMap[parkingName] = true;
         }
       });
+    }
+  }
+
+  void _changeFilterOption(FilterOption option) {
+    setState(() {
+      selectedFilterOption = option;
+      // 필터링된 주차장 데이터 업데이트
+      _filterParkingData();
+    });
+  }
+
+  void _filterParkingData() {
+    setState(() {
+      if (selectedFilterOption == FilterOption.all) {
+        // 전체 옵션 선택 시, 모든 주차장 데이터 유지
+        filteredParkingData = List.from(parkingData);
+      } else {
+        // 선택된 필터 옵션에 맞게 주차장 데이터 필터링
+        filteredParkingData = parkingData
+            .where((parking) => _filterParkingByOption(parking))
+            .toList();
+      }
+    });
+  }
+
+  bool _filterParkingByOption(Map<String, dynamic> parking) {
+    switch (selectedFilterOption) {
+      case FilterOption.free:
+        return parking['chrge_clsf'] == '무료';
+      case FilterOption.paid:
+        return parking['chrge_clsf'] == '유료';
+      case FilterOption.mixed:
+        return parking['chrge_clsf'] == '혼합';
+      case FilterOption.all:
+        return true; // 모든 주차장을 반환합니다.
+      default:
+        return false;
+    }
+  }
+
+  String _getFilterOptionText(FilterOption option) {
+    switch (option) {
+      case FilterOption.free:
+        return '무료';
+      case FilterOption.paid:
+        return '유료';
+      case FilterOption.mixed:
+        return '혼합';
+      default:
+        return '전체';
     }
   }
 
@@ -103,7 +157,6 @@ class _HomePageState extends State<HomePage> {
                 await _addMarker(
                     widget.selectedLatitude, widget.selectedLongitude);
                 await _addInfoWindows(); // 데이터 로드가 완료되면 정보창 추가
-                // 비동기 처리보다 동기 처리가 차라리 더빠름..
               }
             },
           ),
@@ -115,9 +168,11 @@ class _HomePageState extends State<HomePage> {
             left: 0,
             right: 0,
             child: Padding(
-              padding: const EdgeInsets.all(30.0),
+              padding:
+                  const EdgeInsets.only(top: 30.0, left: 20.0, right: 20.0),
               child: Container(
-                height: MediaQuery.of(context).size.height * 0.12, // 화면 높이의 12%
+                height:
+                    MediaQuery.of(context).size.height * 0.151, // 화면 높이의 12%
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(10.0),
@@ -161,12 +216,12 @@ class _HomePageState extends State<HomePage> {
                       color: Colors.grey,
                       thickness: 0.5,
                     ),
-                    Row(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                          child: Padding(
-                            padding: const EdgeInsets.only(top: 4.0),
+                    Padding(
+                      padding: const EdgeInsets.only(
+                          bottom: 14.0, left: 5.0, right: 5.0),
+                      child: Row(
+                        children: [
+                          Expanded(
                             child: GestureDetector(
                               onTap: () {
                                 Navigator.push(
@@ -190,8 +245,26 @@ class _HomePageState extends State<HomePage> {
                               ),
                             ),
                           ),
-                        ),
-                      ],
+                          DropdownButton<FilterOption>(
+                            value: selectedFilterOption,
+                            underline: Container(), // 드롭다운버튼 밑줄 없애기
+                            onChanged: (FilterOption? option) {
+                              if (option != null) {
+                                setState(() {
+                                  _changeFilterOption(option);
+                                });
+                              }
+                            },
+                            items:
+                                FilterOption.values.map((FilterOption option) {
+                              return DropdownMenuItem<FilterOption>(
+                                value: option,
+                                child: Text(_getFilterOptionText(option)),
+                              );
+                            }).toList(),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -304,9 +377,6 @@ class _HomePageState extends State<HomePage> {
   // 주차장 정보를 보여주는 다이얼로그 표시
   void _showParkingDetails(Map<String, dynamic> parkingData) async {
     final String parkingName = parkingData['prkplce_nm'];
-    final double parkingLa = parkingData['prkplce_la'];
-    final double parkingLo = parkingData['prkplce_lo'];
-
     final bool isFavorite =
         favoriteStatusMap[parkingName] ?? false; // 해당 주차장의 즐겨찾기 상태 가져오기
 
