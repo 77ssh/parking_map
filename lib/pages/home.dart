@@ -74,15 +74,15 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  void _changeFilterOption(FilterOption option) {
+  void _changeFilterOption(FilterOption option) async {
     setState(() {
       selectedFilterOption = option;
-      // 필터링된 주차장 데이터 업데이트
-      _filterParkingData();
     });
+    // 필터링된 주차장 데이터 업데이트
+    await _filterParkingData();
   }
 
-  void _filterParkingData() {
+  Future<void> _filterParkingData() async {
     setState(() {
       if (selectedFilterOption == FilterOption.all) {
         // 전체 옵션 선택 시, 모든 주차장 데이터 유지
@@ -92,6 +92,7 @@ class _HomePageState extends State<HomePage> {
         filteredParkingData = parkingData
             .where((parking) => _filterParkingByOption(parking))
             .toList();
+        debugPrint('데이터 잘 나왔나 확인 $_filterParkingByOption(parking)');
       }
     });
   }
@@ -99,15 +100,16 @@ class _HomePageState extends State<HomePage> {
   bool _filterParkingByOption(Map<String, dynamic> parking) {
     switch (selectedFilterOption) {
       case FilterOption.free:
+        debugPrint('무료 주차장 필터링: ${parking['chrge_clsf'] == '무료'}');
         return parking['chrge_clsf'] == '무료';
       case FilterOption.paid:
+        debugPrint('유료 주차장 필터링: ${parking['chrge_clsf'] == '유료'}');
         return parking['chrge_clsf'] == '유료';
       case FilterOption.mixed:
+        debugPrint('혼합 주차장 필터링: ${parking['chrge_clsf'] == '혼합'}');
         return parking['chrge_clsf'] == '혼합';
       case FilterOption.all:
         return true; // 모든 주차장을 반환합니다.
-      default:
-        return false;
     }
   }
 
@@ -119,7 +121,7 @@ class _HomePageState extends State<HomePage> {
         return '유료';
       case FilterOption.mixed:
         return '혼합';
-      default:
+      case FilterOption.all:
         return '전체';
     }
   }
@@ -339,7 +341,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // 지도에 띄울 수 있는 정보창(json 파일에서 불러올 데이터 선택헤서 불러옴)
+// 지도에 띄울 수 있는 정보창(json 파일에서 불러올 데이터 선택헤서 불러옴)
   Future<void> _addInfoWindows() async {
     final controller = _mapController;
     if (controller != null && parkingData.isNotEmpty) {
@@ -353,8 +355,7 @@ class _HomePageState extends State<HomePage> {
         await controller.addOverlay(infoWindow);
         // 정보창에 터치 이벤트 리스너 등록
         infoWindow.setOnTapListener((NInfoWindow infoWindow) {
-          _showParkingDetails(
-              parking); // 터치 이벤트 리스너 등록의 핵심코드(json 불러오는 parking으로 해결)
+          _showParkingDetails(parking);
         });
       }
     }
