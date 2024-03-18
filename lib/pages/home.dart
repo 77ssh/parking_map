@@ -53,8 +53,8 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         parkingData = json.decode(jsonString).cast<Map<String, dynamic>>();
       });
-      // 데이터 로드가 완료되면 정보창 추가
-      await _addInfoWindows();
+      await _filterParkingData(); // 데이터 로드 후 필터링 함수 호출
+      await _addInfoWindows(); // 데이터 로드 후 정보창 추가
     } catch (e) {
       debugPrint('주차 데이터 로드 실패: $e');
     }
@@ -82,19 +82,22 @@ class _HomePageState extends State<HomePage> {
     await _filterParkingData();
   }
 
+// 필터링된 주차장 데이터 업데이트
   Future<void> _filterParkingData() async {
     setState(() {
       if (selectedFilterOption == FilterOption.all) {
-        // 전체 옵션 선택 시, 모든 주차장 데이터 유지
-        filteredParkingData = List.from(parkingData);
+        filteredParkingData =
+            List.from(parkingData); // 전체 옵션 선택 시, 모든 주차장 데이터 유지
       } else {
-        // 선택된 필터 옵션에 맞게 주차장 데이터 필터링
         filteredParkingData = parkingData
             .where((parking) => _filterParkingByOption(parking))
-            .toList();
-        debugPrint('데이터 잘 나왔나 확인 $_filterParkingByOption(parking)');
+            .toList(); // 선택된 필터 옵션에 맞게 주차장 데이터 필터링
       }
     });
+    // 필터링된 데이터로 정보창 추가
+    await _addInfoWindows();
+
+    debugPrint('필터링 데이터: $filteredParkingData');
   }
 
   bool _filterParkingByOption(Map<String, dynamic> parking) {
@@ -344,16 +347,21 @@ class _HomePageState extends State<HomePage> {
 // 지도에 띄울 수 있는 정보창(json 파일에서 불러올 데이터 선택헤서 불러옴)
   Future<void> _addInfoWindows() async {
     final controller = _mapController;
-    if (controller != null && parkingData.isNotEmpty) {
-      for (var parking in parkingData) {
+    if (controller != null && filteredParkingData.isNotEmpty) {
+      // 현재 지도에 표시된 모든 정보창 제거
+      await controller.clearOverlays();
+
+      // 필터링된 데이터를 기반으로 새로운 정보창 추가
+      for (var parking in filteredParkingData) {
         final infoWindow = NInfoWindow.onMap(
           id: parking['prkplce_mnnmb'],
           text: "${parking['prkplce_nm']}", // 주차장명
-          position: NLatLng(parking['prkplce_la'],
-              parking['prkplce_lo']), // 주차장 표시하는 위치(경도,위도)
+          position: NLatLng(
+              parking['prkplce_la'], parking['prkplce_lo']), // 주차장 위치(경도,위도)
         );
         await controller.addOverlay(infoWindow);
-        // 정보창에 터치 이벤트 리스너 등록
+
+        // 정보창 터치 이벤트 리스너 등록
         infoWindow.setOnTapListener((NInfoWindow infoWindow) {
           _showParkingDetails(parking);
         });
