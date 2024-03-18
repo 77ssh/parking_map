@@ -137,6 +137,10 @@ class _HomePageState extends State<HomePage> {
         children: [
           NaverMap(
             options: NaverMapViewOptions(
+              locationButtonEnable: true, // 현재 위치 버튼
+              logoAlign: NLogoAlign.leftBottom, // 로고를 왼쪽 아래로 정렬합니다.
+              logoMargin: const EdgeInsets.only(
+                  bottom: 120, right: 16), // 로고의 마진을 설정합니다.
               minZoom: _minZoom, // default is 0
               maxZoom: _maxZoom, // default is 21
               maxTilt: _maxTilt, // default is 63
