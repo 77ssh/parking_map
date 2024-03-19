@@ -6,10 +6,8 @@ import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:parking_map/pages/search.dart';
 import 'package:parking_map/pages/star.dart';
-import 'package:parking_map/pages/filter.dart';
 import 'package:parking_map/pages/mypageview.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:geolocator/geolocator.dart';
 
 enum FilterOption { free, paid, mixed, all } // 필터링 옵션들
 
@@ -130,38 +128,6 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  // 현재 위치 가져오기
-  Future<Position?> _getCurrentLocation() async {
-    bool serviceEnabled;
-    LocationPermission permission;
-
-    // 위치 서비스가 활성화되어 있는지 확인
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      // 위치 서비스가 비활성화되어 있다면, 사용자에게 위치 서비스를 활성화하도록 요청
-      serviceEnabled = await Geolocator.openLocationSettings();
-      if (!serviceEnabled) {
-        return Future.error('위치 서비스 사용을 허가해주세요');
-      }
-    }
-    // 위치 권한을 확인
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      // 위치 권한이 거부된 경우, 사용자에게 위치 권한을 요청
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        return Future.error('위치 서비스 사용 불가');
-      }
-    }
-    if (permission == LocationPermission.deniedForever) {
-      // 사용자가 영구적으로 위치 권한을 거부한 경우, 설정으로 이동하여 권한을 변경할 수 있도록 안내
-      return Future.error('위치 서비스 영구 거부, 위치 서비스 사용 불가');
-    }
-    // 위치 정보 가져오기
-    return await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high);
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -170,6 +136,7 @@ class _HomePageState extends State<HomePage> {
         children: [
           NaverMap(
             options: NaverMapViewOptions(
+              locationButtonEnable: true,
               logoAlign: NLogoAlign.leftBottom, // 로고를 왼쪽 아래로 정렬합니다.
               logoMargin: const EdgeInsets.only(
                   bottom: 120, right: 16), // 로고의 마진을 설정합니다.
@@ -195,19 +162,11 @@ class _HomePageState extends State<HomePage> {
                   widget.selectedLongitude != null &&
                   widget.selectedLatitude != 37.36771852000005 &&
                   widget.selectedLongitude != 127.1042703539339) {
-                await _addMarker(
-                    widget.selectedLatitude, widget.selectedLongitude);
+                // await _addMarker(
+                //     widget.selectedLatitude, widget.selectedLongitude);
                 await _addInfoWindows(); // 데이터 로드가 완료되면 정보창 추가
               }
             },
-          ),
-          Positioned(
-            bottom: 120.0,
-            right: 5.0,
-            child: FloatingActionButton(
-              onPressed: _goToCurrentLocation,
-              child: const Icon(Icons.my_location),
-            ),
           ),
           // 네이버맵 위로 쌓여야하기 때문에 뒤에 위치해야함.
           // appbar 역할을 하는 컨테이너
@@ -270,26 +229,16 @@ class _HomePageState extends State<HomePage> {
                       child: Row(
                         children: [
                           Expanded(
-                            child: GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => const FilterPage(),
+                            child: RichText(
+                              text: TextSpan(
+                                style: DefaultTextStyle.of(context).style,
+                                children: [
+                                  TextSpan(
+                                    text: ' ✔ 필터',
+                                    style:
+                                        Theme.of(context).textTheme.bodyLarge,
                                   ),
-                                );
-                              },
-                              child: RichText(
-                                text: TextSpan(
-                                  style: DefaultTextStyle.of(context).style,
-                                  children: [
-                                    TextSpan(
-                                      text: ' ✔ 필터',
-                                      style:
-                                          Theme.of(context).textTheme.bodyLarge,
-                                    ),
-                                  ],
-                                ),
+                                ],
                               ),
                             ),
                           ),
@@ -321,67 +270,67 @@ class _HomePageState extends State<HomePage> {
           ),
 
           // bottomnavigationbar 역할을 하는 컨테이너
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: Container(
-              height: MediaQuery.of(context).size.height * 0.15, // 화면 높이의 15%
-              decoration: BoxDecoration(
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.3), // 그림자 색상 및 투명도 설정
-                    spreadRadius: 5, // 그림자의 확산 정도
-                    blurRadius: 7, // 그림자의 흐릿한 정도
-                    offset: const Offset(0, 3), // 그림자의 위치 조정 (수평, 수직)
-                  ),
-                ],
-              ),
-              child: Column(
-                children: [
-                  Align(
-                    alignment: Alignment.topCenter,
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 15.0),
-                      child: GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const StarPage()),
-                          );
-                        },
-                        child: RichText(
-                          text: TextSpan(
-                            style: DefaultTextStyle.of(context).style,
-                            children: [
-                              TextSpan(
-                                text: ' ⭐ 즐겨찾기',
-                                style: Theme.of(context).textTheme.bodyLarge,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  // 즐겨찾기 밑에 들어갈 pageview 적용된 컨테이너 추가하기
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 25.0), // 가로 방향으로만 패딩 추가
-                    child: SizedBox(
-                      height: MediaQuery.of(context).size.height * 0.05,
-                      child: const MyPageView(),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+          // Positioned(
+          //   bottom: 0,
+          //   left: 0,
+          //   right: 0,
+          //   child: Container(
+          //     height: MediaQuery.of(context).size.height * 0.15, // 화면 높이의 15%
+          //     decoration: BoxDecoration(
+          //       color: Colors.white,
+          //       boxShadow: [
+          //         BoxShadow(
+          //           color: Colors.grey.withOpacity(0.3), // 그림자 색상 및 투명도 설정
+          //           spreadRadius: 5, // 그림자의 확산 정도
+          //           blurRadius: 7, // 그림자의 흐릿한 정도
+          //           offset: const Offset(0, 3), // 그림자의 위치 조정 (수평, 수직)
+          //         ),
+          //       ],
+          //     ),
+          //     child: Column(
+          //       children: [
+          //         Align(
+          //           alignment: Alignment.topCenter,
+          //           child: Padding(
+          //             padding: const EdgeInsets.only(top: 15.0),
+          //             child: GestureDetector(
+          //               onTap: () {
+          //                 Navigator.push(
+          //                   context,
+          //                   MaterialPageRoute(
+          //                       builder: (context) => const StarPage()),
+          //                 );
+          //               },
+          //               child: RichText(
+          //                 text: TextSpan(
+          //                   style: DefaultTextStyle.of(context).style,
+          //                   children: [
+          //                     TextSpan(
+          //                       text: ' ⭐ 즐겨찾기',
+          //                       style: Theme.of(context).textTheme.bodyLarge,
+          //                     ),
+          //                   ],
+          //                 ),
+          //               ),
+          //             ),
+          //           ),
+          //         ),
+          //         // 즐겨찾기 밑에 들어갈 pageview 적용된 컨테이너 추가하기
+          //         const SizedBox(
+          //           height: 20,
+          //         ),
+          //         Padding(
+          //           padding: const EdgeInsets.symmetric(
+          //               horizontal: 25.0), // 가로 방향으로만 패딩 추가
+          //           child: SizedBox(
+          //             height: MediaQuery.of(context).size.height * 0.05,
+          //             child: const MyPageView(),
+          //           ),
+          //         ),
+          //       ],
+          //     ),
+          //   ),
+          // ),
         ],
       ),
     );
@@ -412,48 +361,19 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  Future<void> _goToCurrentLocation() async {
-    try {
-      // 현재 위치 가져오기
-      Position? position = await _getCurrentLocation();
-      if (position != null) {
-        // 현재 위치로 지도 이동
-        _mapController?.updateCamera(
-          NCameraUpdate.withParams(
-            target: NLatLng(position.latitude, position.longitude),
-          ),
-        );
-        // 현재 위치에 마커 추가
-        await _addMarker(position.latitude, position.longitude);
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('위치 정보를 가져올 수 없습니다.'),
-          ),
-        );
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('위치 정보를 가져올 수 없습니다.'),
-        ),
-      );
-    }
-  }
-
-  // 검색으로 불러온 위치정보에 마커 추가
-  Future<NMarker?> _addMarker(double latitude, double longitude) async {
-    if (_mapController != null) {
-      final marker = NMarker(
-        id: '',
-        position: NLatLng(widget.selectedLatitude, widget.selectedLongitude),
-      );
-      await _mapController!.addOverlay(marker);
-      return Future.value(marker); // 마커를 Future로 감싸서 반환
-    }
-    // 지도 컨트롤러가 null이면 null을 Future로 감싸서 반환
-    return Future.value(null);
-  }
+  // // 검색으로 불러온 위치정보에 마커 추가
+  // Future<NMarker?> _addMarker(double latitude, double longitude) async {
+  //   if (_mapController != null) {
+  //     final marker = NMarker(
+  //       id: '',
+  //       position: NLatLng(widget.selectedLatitude, widget.selectedLongitude),
+  //     );
+  //     await _mapController!.addOverlay(marker);
+  //     return Future.value(marker); // 마커를 Future로 감싸서 반환
+  //   }
+  //   // 지도 컨트롤러가 null이면 null을 Future로 감싸서 반환
+  //   return Future.value(null);
+  // }
 
   // 주차장 정보를 보여주는 다이얼로그 표시
   void _showParkingDetails(Map<String, dynamic> parkingData) async {
