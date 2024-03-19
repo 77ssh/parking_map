@@ -26,6 +26,7 @@ android {
     namespace "com.example.parking_map"
     compileSdk flutter.compileSdkVersion
     ndkVersion flutter.ndkVersion
+    
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -64,4 +65,5 @@ flutter {
     source '../..'
 }
 
-dependencies {}
+ dependencies {
+    }

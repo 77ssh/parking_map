@@ -16,6 +16,8 @@ dependencies:
   speech_to_text: ^6.6.1
   permission_handler: ^11.3.0
   flutter_slidable: ^3.0.1
+  geolocator: ^7.0.0 # 버전 절대 올리지 말기 11은 충돌남 현재는 7 사용
+
   
   
     

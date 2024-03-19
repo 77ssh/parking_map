@@ -9,6 +9,7 @@ import 'package:parking_map/pages/star.dart';
 import 'package:parking_map/pages/filter.dart';
 import 'package:parking_map/pages/mypageview.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:geolocator/geolocator.dart';
 
 enum FilterOption { free, paid, mixed, all } // 필터링 옵션들
 
@@ -129,6 +130,38 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  // 현재 위치 가져오기
+  Future<Position?> _getCurrentLocation() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    // 위치 서비스가 활성화되어 있는지 확인
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      // 위치 서비스가 비활성화되어 있다면, 사용자에게 위치 서비스를 활성화하도록 요청
+      serviceEnabled = await Geolocator.openLocationSettings();
+      if (!serviceEnabled) {
+        return Future.error('위치 서비스 사용을 허가해주세요');
+      }
+    }
+    // 위치 권한을 확인
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      // 위치 권한이 거부된 경우, 사용자에게 위치 권한을 요청
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        return Future.error('위치 서비스 사용 불가');
+      }
+    }
+    if (permission == LocationPermission.deniedForever) {
+      // 사용자가 영구적으로 위치 권한을 거부한 경우, 설정으로 이동하여 권한을 변경할 수 있도록 안내
+      return Future.error('위치 서비스 영구 거부, 위치 서비스 사용 불가');
+    }
+    // 위치 정보 가져오기
+    return await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -137,7 +170,6 @@ class _HomePageState extends State<HomePage> {
         children: [
           NaverMap(
             options: NaverMapViewOptions(
-              locationButtonEnable: true, // 현재 위치 버튼
               logoAlign: NLogoAlign.leftBottom, // 로고를 왼쪽 아래로 정렬합니다.
               logoMargin: const EdgeInsets.only(
                   bottom: 120, right: 16), // 로고의 마진을 설정합니다.
@@ -169,7 +201,14 @@ class _HomePageState extends State<HomePage> {
               }
             },
           ),
-
+          Positioned(
+            bottom: 120.0,
+            right: 5.0,
+            child: FloatingActionButton(
+              onPressed: _goToCurrentLocation,
+              child: const Icon(Icons.my_location),
+            ),
+          ),
           // 네이버맵 위로 쌓여야하기 때문에 뒤에 위치해야함.
           // appbar 역할을 하는 컨테이너
           Positioned(
@@ -373,14 +412,43 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  Future<void> _goToCurrentLocation() async {
+    try {
+      // 현재 위치 가져오기
+      Position? position = await _getCurrentLocation();
+      if (position != null) {
+        // 현재 위치로 지도 이동
+        _mapController?.updateCamera(
+          NCameraUpdate.withParams(
+            target: NLatLng(position.latitude, position.longitude),
+          ),
+        );
+        // 현재 위치에 마커 추가
+        await _addMarker(position.latitude, position.longitude);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('위치 정보를 가져올 수 없습니다.'),
+          ),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('위치 정보를 가져올 수 없습니다.'),
+        ),
+      );
+    }
+  }
+
   // 검색으로 불러온 위치정보에 마커 추가
-  Future<NMarker?> _addMarker(double latitude, double longitude) {
+  Future<NMarker?> _addMarker(double latitude, double longitude) async {
     if (_mapController != null) {
       final marker = NMarker(
         id: '',
         position: NLatLng(widget.selectedLatitude, widget.selectedLongitude),
       );
-      _mapController!.addOverlay(marker);
+      await _mapController!.addOverlay(marker);
       return Future.value(marker); // 마커를 Future로 감싸서 반환
     }
     // 지도 컨트롤러가 null이면 null을 Future로 감싸서 반환
