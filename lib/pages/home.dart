@@ -168,7 +168,7 @@ class _HomePageState extends State<HomePage> {
               locationButtonEnable: true, // 내 위치 표시 기능이라는데 구현 뷸가
               logoAlign: NLogoAlign.leftBottom, // 로고를 왼쪽 아래로 정렬합니다.
               logoMargin: const EdgeInsets.only(
-                  bottom: 120, right: 16), // 로고의 마진을 설정합니다.
+                  bottom: 120, left: 10), // 로고의 마진을 설정합니다.
               minZoom: _minZoom, // default is 0
               maxZoom: _maxZoom, // default is 21
               maxTilt: _maxTilt, // default is 63
@@ -300,67 +300,67 @@ class _HomePageState extends State<HomePage> {
           ),
 
           // bottomnavigationbar 역할을 하는 컨테이너
-          // Positioned(
-          //   bottom: 0,
-          //   left: 0,
-          //   right: 0,
-          //   child: Container(
-          //     height: MediaQuery.of(context).size.height * 0.15, // 화면 높이의 15%
-          //     decoration: BoxDecoration(
-          //       color: Colors.white,
-          //       boxShadow: [
-          //         BoxShadow(
-          //           color: Colors.grey.withOpacity(0.3), // 그림자 색상 및 투명도 설정
-          //           spreadRadius: 5, // 그림자의 확산 정도
-          //           blurRadius: 7, // 그림자의 흐릿한 정도
-          //           offset: const Offset(0, 3), // 그림자의 위치 조정 (수평, 수직)
-          //         ),
-          //       ],
-          //     ),
-          //     child: Column(
-          //       children: [
-          //         Align(
-          //           alignment: Alignment.topCenter,
-          //           child: Padding(
-          //             padding: const EdgeInsets.only(top: 15.0),
-          //             child: GestureDetector(
-          //               onTap: () {
-          //                 Navigator.push(
-          //                   context,
-          //                   MaterialPageRoute(
-          //                       builder: (context) => const StarPage()),
-          //                 );
-          //               },
-          //               child: RichText(
-          //                 text: TextSpan(
-          //                   style: DefaultTextStyle.of(context).style,
-          //                   children: [
-          //                     TextSpan(
-          //                       text: ' ⭐ 즐겨찾기',
-          //                       style: Theme.of(context).textTheme.bodyLarge,
-          //                     ),
-          //                   ],
-          //                 ),
-          //               ),
-          //             ),
-          //           ),
-          //         ),
-          //         // 즐겨찾기 밑에 들어갈 pageview 적용된 컨테이너 추가하기
-          //         const SizedBox(
-          //           height: 20,
-          //         ),
-          //         Padding(
-          //           padding: const EdgeInsets.symmetric(
-          //               horizontal: 25.0), // 가로 방향으로만 패딩 추가
-          //           child: SizedBox(
-          //             height: MediaQuery.of(context).size.height * 0.05,
-          //             child: const MyPageView(),
-          //           ),
-          //         ),
-          //       ],
-          //     ),
-          //   ),
-          // ),
+          Positioned(
+            bottom: 0,
+            left: 80,
+            right: 0,
+            child: Container(
+              height: MediaQuery.of(context).size.height * 0.15, // 화면 높이의 15%
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.3), // 그림자 색상 및 투명도 설정
+                    spreadRadius: 5, // 그림자의 확산 정도
+                    blurRadius: 7, // 그림자의 흐릿한 정도
+                    offset: const Offset(0, 3), // 그림자의 위치 조정 (수평, 수직)
+                  ),
+                ],
+              ),
+              child: Column(
+                children: [
+                  Align(
+                    alignment: Alignment.topCenter,
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 15.0),
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const StarPage()),
+                          );
+                        },
+                        child: RichText(
+                          text: TextSpan(
+                            style: DefaultTextStyle.of(context).style,
+                            children: [
+                              TextSpan(
+                                text: ' ⭐ 즐겨찾기',
+                                style: Theme.of(context).textTheme.bodyLarge,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  // 즐겨찾기 밑에 들어갈 pageview 적용된 컨테이너 추가하기
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 25.0), // 가로 방향으로만 패딩 추가
+                    child: SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.05,
+                      child: const MyPageView(),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );
