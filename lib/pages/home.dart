@@ -8,6 +8,7 @@ import 'package:parking_map/pages/search.dart';
 import 'package:parking_map/pages/star.dart';
 import 'package:parking_map/pages/mypageview.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 enum FilterOption { free, paid, mixed, all } // 필터링 옵션들
 
@@ -128,6 +129,34 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  // 위치 허용 권한 함수
+  Future<void> _requestLocationPermission() async {
+    Map<Permission, PermissionStatus> status =
+        await [Permission.location].request(); // [] 권한배열에 권한을 작성 -> 여기서는 음성인식만
+    debugPrint('위치 서비스 허용: $status');
+    if (await Permission.location.isGranted) {
+      // 권한이 허용된 경우 위치 추적 모드를 활성화
+      debugPrint(
+          'Location permission granted. Enabling location tracking mode...');
+      _mapController?.setLocationTrackingMode(NLocationTrackingMode.follow);
+    } else {
+      // 권한이 거부된 경우 사용자에게 메시지를 표시
+      showDialog(
+        context: context,
+        builder: (BuildContext context) => AlertDialog(
+          title: const Text('위치 권한 필요'),
+          content: const Text('현재 위치를 찾기 위해서는 위치 권한이 필요합니다.'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('확인'),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ],
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -158,6 +187,7 @@ class _HomePageState extends State<HomePage> {
             onMapReady: (controller) async {
               debugPrint('지도가 준비되었습니다.');
               _mapController = controller; // 지도 컨트롤러 설정
+              await _requestLocationPermission(); // 화면 로드 시 위치 권한 요청
               if (widget.selectedLatitude != null &&
                   widget.selectedLongitude != null &&
                   widget.selectedLatitude != 37.36771852000005 &&
@@ -270,67 +300,67 @@ class _HomePageState extends State<HomePage> {
           ),
 
           // bottomnavigationbar 역할을 하는 컨테이너
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: Container(
-              height: MediaQuery.of(context).size.height * 0.15, // 화면 높이의 15%
-              decoration: BoxDecoration(
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.3), // 그림자 색상 및 투명도 설정
-                    spreadRadius: 5, // 그림자의 확산 정도
-                    blurRadius: 7, // 그림자의 흐릿한 정도
-                    offset: const Offset(0, 3), // 그림자의 위치 조정 (수평, 수직)
-                  ),
-                ],
-              ),
-              child: Column(
-                children: [
-                  Align(
-                    alignment: Alignment.topCenter,
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 15.0),
-                      child: GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const StarPage()),
-                          );
-                        },
-                        child: RichText(
-                          text: TextSpan(
-                            style: DefaultTextStyle.of(context).style,
-                            children: [
-                              TextSpan(
-                                text: ' ⭐ 즐겨찾기',
-                                style: Theme.of(context).textTheme.bodyLarge,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  // 즐겨찾기 밑에 들어갈 pageview 적용된 컨테이너 추가하기
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 25.0), // 가로 방향으로만 패딩 추가
-                    child: SizedBox(
-                      height: MediaQuery.of(context).size.height * 0.05,
-                      child: const MyPageView(),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+          // Positioned(
+          //   bottom: 0,
+          //   left: 0,
+          //   right: 0,
+          //   child: Container(
+          //     height: MediaQuery.of(context).size.height * 0.15, // 화면 높이의 15%
+          //     decoration: BoxDecoration(
+          //       color: Colors.white,
+          //       boxShadow: [
+          //         BoxShadow(
+          //           color: Colors.grey.withOpacity(0.3), // 그림자 색상 및 투명도 설정
+          //           spreadRadius: 5, // 그림자의 확산 정도
+          //           blurRadius: 7, // 그림자의 흐릿한 정도
+          //           offset: const Offset(0, 3), // 그림자의 위치 조정 (수평, 수직)
+          //         ),
+          //       ],
+          //     ),
+          //     child: Column(
+          //       children: [
+          //         Align(
+          //           alignment: Alignment.topCenter,
+          //           child: Padding(
+          //             padding: const EdgeInsets.only(top: 15.0),
+          //             child: GestureDetector(
+          //               onTap: () {
+          //                 Navigator.push(
+          //                   context,
+          //                   MaterialPageRoute(
+          //                       builder: (context) => const StarPage()),
+          //                 );
+          //               },
+          //               child: RichText(
+          //                 text: TextSpan(
+          //                   style: DefaultTextStyle.of(context).style,
+          //                   children: [
+          //                     TextSpan(
+          //                       text: ' ⭐ 즐겨찾기',
+          //                       style: Theme.of(context).textTheme.bodyLarge,
+          //                     ),
+          //                   ],
+          //                 ),
+          //               ),
+          //             ),
+          //           ),
+          //         ),
+          //         // 즐겨찾기 밑에 들어갈 pageview 적용된 컨테이너 추가하기
+          //         const SizedBox(
+          //           height: 20,
+          //         ),
+          //         Padding(
+          //           padding: const EdgeInsets.symmetric(
+          //               horizontal: 25.0), // 가로 방향으로만 패딩 추가
+          //           child: SizedBox(
+          //             height: MediaQuery.of(context).size.height * 0.05,
+          //             child: const MyPageView(),
+          //           ),
+          //         ),
+          //       ],
+          //     ),
+          //   ),
+          // ),
         ],
       ),
     );
